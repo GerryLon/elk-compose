@@ -9,6 +9,16 @@ filebeat:
       log_source: myapp-log
       log_type: stdout
 
+    # 多行日志的处理, 如panic
+    # ref: https://www.elastic.co/guide/en/beats/filebeat/current/multiline-examples.html
+    multiline:
+      pattern: '^panic'
+      negate: true
+      match: after
+      flush_pattern: '^exit status \d+' # panic end
+      max_lines: 100
+      # timeout: 3s # default 5s
+
   # setting 'filebeat.prospectors' has been removed; 
   # setting 'filebeat.registry_file' has been removed
   registry:

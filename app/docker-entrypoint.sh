@@ -27,8 +27,26 @@ log() {
 	echo "[${host}] [${time}] [${level}] (GoID:${goid}) (${func}) ${msg}" >> "${logfile}"
 }
 
+# 模拟多行日志
+panic() {
+	cat >"${logfile}"<<EOF
+panic: some panic message
+
+goroutine 1 [running]:
+main.main()
+        /var/workspace/code/go/git2/test-group/hello-go/main.go:52 +0x95
+exit status $((1+RANDOM%5))
+EOF
+}
+
 while true; do
 	log
-	interval=$((1+RANDOM%5)) # 1-5 seconds
+	interval=$((1+RANDOM%3)) # [1, 3]
+
+	# 随机panic
+	if [[ ${interval} -ge 2 ]]; then
+		panic
+	fi
+
 	sleep $interval
 done

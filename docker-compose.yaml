@@ -1,7 +1,7 @@
 version: "3"
 services:
   app:
-    image: mydomain.com/app:v0.4-test
+    image: mydomain.com/app:v0.5-test
     container_name: app
     build:
       context: ./app
