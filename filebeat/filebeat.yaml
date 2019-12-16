@@ -1,0 +1,24 @@
+filebeat:
+  inputs:
+  - type: log
+    enabled: true
+    paths:  # 这里是容器内的path
+    - /var/log/myapp/default/stdout.log
+    fields_under_root: false
+    fields:
+      log_source: myapp-log
+      log_type: stdout
+
+  # setting 'filebeat.prospectors' has been removed; 
+  # setting 'filebeat.registry_file' has been removed
+  registry:
+    path: registry
+    file: /usr/share/filebeat/data/registry/registry  # 这个文件记录日志读取的位置，如果容器重启，可以从记录的位置开始取日志
+    file_permissions: 0600
+
+output:
+  # elasticsearch:  # 我这里是输出到elasticsearch，也可以输出到logstash
+  #   index: "filebeat"  #  kibana中的索引
+  #   hosts: ["elasticsearch:9200"] # elasticsearch地址
+  logstash:
+    hosts: ["logstash:5044"]

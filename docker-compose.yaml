@@ -1,0 +1,63 @@
+version: "3"
+services:
+  app:
+    image: mydomain.com/app:v0.4-test
+    container_name: app
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    restart: always
+    volumes:
+      - /tmp/logs:/var/log/myapp/default
+  elasticsearch:
+    image: elasticsearch:7.5.0
+    container_name: elasticsearch
+    environment:
+    - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    - "discovery.type=single-node"
+    volumes:
+    - ./elasticsearch/data:/usr/share/elasticsearch/data
+    hostname: elasticsearch
+    restart: always
+    ports:
+    - "9200:9200"
+    - "9300:9300"
+  logstash:
+    image: logstash:7.5.0
+    container_name: logstash
+    hostname: logstash
+    # build:
+    #   context: logstash
+    #   dockerfile: Dockerfile
+    ports:
+    - 5044:5044
+    environment:
+      LOG_LEVEL: error
+    volumes:
+    - ./logstash/config/logstash.yaml:/usr/share/logstash/config/logstash.yml
+    - ./logstash/pipeline/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    links:
+    - elasticsearch
+  kibana:
+    image: kibana:7.5.0
+    environment:
+    - ELASTICSEARCH_URL=http://elasticsearch:9200
+    container_name: kibana
+    hostname: kibana
+    depends_on:
+    - elasticsearch
+    restart: always
+    ports:
+    - "5601:5601"
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.5.0
+    volumes:
+    - /tmp/logs:/var/log/myapp/default:ro
+    - ./filebeat/filebeat.yaml:/usr/share/filebeat/filebeat.yml:ro
+    container_name: filebeat
+    hostname: filebeat
+    restart: always
+    privileged: true
+    depends_on:
+    # - elasticsearch
+    - logstash
