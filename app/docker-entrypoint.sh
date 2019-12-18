@@ -29,22 +29,22 @@ log() {
 
 # 模拟多行日志
 panic() {
-	cat >"${logfile}"<<EOF
+	echo "${logfile}
 panic: some panic message
 
 goroutine 1 [running]:
 main.main()
         /var/workspace/code/go/git2/test-group/hello-go/main.go:52 +0x95
-exit status $((1+RANDOM%5))
-EOF
+exit status $((1+RANDOM%5))" >> "${logfile}"
 }
 
 while true; do
 	log
-	interval=$((1+RANDOM%3)) # [1, 3]
+	max=10
+	interval=$((1+RANDOM%max))
 
 	# 随机panic
-	if [[ ${interval} -ge 2 ]]; then
+	if [[ ${interval} -ge $((max/2)) ]]; then
 		panic
 	fi
 

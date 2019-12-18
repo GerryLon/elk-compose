@@ -4,3 +4,5 @@ FROM alpine
 COPY docker-entrypoint.sh .
 
 ENTRYPOINT ["sh", "docker-entrypoint.sh"]
+
+

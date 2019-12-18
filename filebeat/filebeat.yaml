@@ -5,22 +5,31 @@ filebeat:
     paths:  # 这里是容器内的path
     - /var/log/myapp/default/stdout.log
     fields_under_root: false
-    fields:
-      log_source: myapp-log
-      log_type: stdout
+    tags: ["myapp-log", "stdout"]
+    # fields:
+    #   log_source: myapp-log
+    #   log_type: stdout
+
+    # ref: https://github.com/elastic/beats/blob/master/filebeat/filebeat.reference.yml
+    # rotate
+    close_removed: true
+    close_inactive: 5m
+    scan_frequency: 10s
 
     # 多行日志的处理, 如panic
     # ref: https://www.elastic.co/guide/en/beats/filebeat/current/multiline-examples.html
-    multiline:
-      pattern: '^panic'
-      negate: true
-      match: after
-      flush_pattern: '^exit status \d+' # panic end
-      max_lines: 100
+    # multiline:
+    #   pattern: '^panic:'
+    #   negate: true
+    #   match: after
+    #   flush_pattern: '^exit status \d+' # panic end
+      #max_lines: 100
       # timeout: 3s # default 5s
+    # include_lines: ["^panic"]
 
   # setting 'filebeat.prospectors' has been removed; 
   # setting 'filebeat.registry_file' has been removed
+  # /usr/share/filebeat/data/registry/filebeat/{meta.json, data.json}
   registry:
     path: registry
     file: /usr/share/filebeat/data/registry/registry  # 这个文件记录日志读取的位置，如果容器重启，可以从记录的位置开始取日志
@@ -30,5 +39,9 @@ output:
   # elasticsearch:  # 我这里是输出到elasticsearch，也可以输出到logstash
   #   index: "filebeat"  #  kibana中的索引
   #   hosts: ["elasticsearch:9200"] # elasticsearch地址
+
+  # https://www.elastic.co/guide/en/beats/filebeat/current/logstash-output.html
   logstash:
+    enabled: true
     hosts: ["logstash:5044"]
+logging.level: info
